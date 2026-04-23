@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: example-pod
+spec:
+  containers:
+    - name: nginx
+      image: nginx
+      resources:
+        requests:
+          cpu: "100m" # 最小保证 0.1 CPU
+          memory: "128Mi" # 最小保证 128Mi 内存
+        limits:
+          cpu: "500m" # 最大使用 0.5 CPU
+          memory: "256Mi" # 最大使用 256Mi 内存

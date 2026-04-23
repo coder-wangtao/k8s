@@ -1,0 +1,13 @@
+# 当 Namespace 内创建 Pod 超出 ResourceQuota 限制时，API 会拒绝创建。
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: team-quota
+  namespace: dev-team
+spec:
+  hard:
+    requests.cpu: "2"
+    requests.memory: "4Gi"
+    limits.cpu: "4"
+    limits.memory: "8Gi"
+    pods: "10"

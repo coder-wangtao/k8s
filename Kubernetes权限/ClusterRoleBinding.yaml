@@ -1,0 +1,16 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: read-all-namespaces
+subjects:
+  - kind: User
+    name: alice
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: namespace-reader
+  apiGroup: rbac.authorization.k8s.io
+
+
+# 将 ClusterRole 绑定给用户 Alice
+# Alice 拥有集群中所有 Namespace 的 Pod 和 Service 的读取权限

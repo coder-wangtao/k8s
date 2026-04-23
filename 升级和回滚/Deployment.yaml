@@ -1,0 +1,30 @@
+spec:
+  strategy:
+    type: RollingUpdate # 或 Recreate
+    rollingUpdate:
+      maxUnavailable: 1 # 升级过程中允许不可用 Pod 数量
+      maxSurge: 1 # 升级过程中额外创建的 Pod 数量
+
+
+# Deployment 支持 滚动更新（Rolling Update） 和 重建（Recreate） 两种策略。
+
+
+# 命令行升级 Pod（Deployment）
+# (1) 修改镜像升级
+kubectl set image deployment/nginx-deploy nginx=nginx:1.21.0
+# 检查升级状态：
+kubectl rollout status deployment/nginx-deploy
+# (2) 查看更新历史
+kubectl rollout history deployment/nginx-deploy
+# 输出
+REVISION  CHANGE-CAUSE
+1         <none>
+2         kubectl set image deployment/nginx-deploy nginx=nginx:1.21.0
+# 回滚 Deployment
+# (1) 回滚到上一个版本
+kubectl rollout undo deployment/nginx-deploy
+# (2) 回滚到指定版本
+kubectl rollout undo deployment/nginx-deploy --to-revision=1
+
+# 查看历史版本：
+kubectl rollout history deployment/nginx-deploy

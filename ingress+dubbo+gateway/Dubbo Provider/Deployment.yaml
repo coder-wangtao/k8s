@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-provider
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: user-provider
+  template:
+    metadata:
+      labels:
+        app: user-provider
+    spec:
+      containers:
+        - name: user-provider
+          image: myrepo/user-provider:1.0
+          ports:
+            - containerPort: 20880
+          env:
+            - name: DUBBO_REGISTRY_ADDRESS
+              value: nacos://nacos.default.svc.cluster.local:8848

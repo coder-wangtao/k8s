@@ -1,0 +1,5 @@
+Pod 的资源限制是所有容器的总和：
+Pod CPU requests = sum(container.requests.cpu)
+Pod CPU limits = sum(container.limits.cpu)
+Pod Memory requests = sum(container.requests.memory)
+Pod Memory limits = sum(container.limits.memory)

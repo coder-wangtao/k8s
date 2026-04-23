@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-service
+spec:
+  selector:
+    app: user-provider
+  ports:
+    - name: dubbo
+      port: 20880
+      targetPort: 20880
