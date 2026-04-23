@@ -1,0 +1,62 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_IMAGE = "your-docker-repo/your-app"
+        IMAGE_TAG = "${GIT_COMMIT}"
+        K8S_DEPLOYMENT_NAME = "your-deployment-name"
+        K8S_NAMESPACE = "default"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                // 拉取 GitLab 中的代码
+                git url: 'https://gitlab.com/your-repo.git', branch: 'main'
+            }
+        }
+
+        stage('Build & Test') {
+            steps {
+                script {
+                    // 构建 Docker 镜像
+                    sh 'docker build -t $DOCKER_IMAGE:$IMAGE_TAG .'
+                    // 推送镜像到仓库
+                    sh 'docker push $DOCKER_IMAGE:$IMAGE_TAG'
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                script {
+                    // 更新 Kubernetes Deployment（实现升级）
+                    try {
+                        sh """
+                        kubectl set image deployment/$K8S_DEPLOYMENT_NAME \
+                        $K8S_DEPLOYMENT_NAME=$DOCKER_IMAGE:$IMAGE_TAG \
+                        --namespace=$K8S_NAMESPACE
+                        """
+                    } catch (Exception e) {
+                        echo "Deployment failed. Rolling back to previous version."
+                        // 如果部署失败，回滚到上一个版本
+                        sh """
+                        kubectl rollout undo deployment/$K8S_DEPLOYMENT_NAME \
+                        --namespace=$K8S_NAMESPACE
+                        """
+                        throw e  // 抛出异常，终止流水线
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "Deployment succeeded!"
+        }
+        failure {
+            echo "Deployment failed!"
+        }
+    }
+}
