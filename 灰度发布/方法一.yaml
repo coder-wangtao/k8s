@@ -1,0 +1,20 @@
+# Kubernetes 中实现灰度发布的几种方式
+# 方法一：使用 Deployment + 分批更新
+# Kubernetes 的 Deployment 本身支持滚动更新（Rolling Update）：
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app
+spec:
+  replicas: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 2
+      maxUnavailable: 1
+  template:
+    spec:
+      containers:
+        - name: my-app
+          image: my-app:v2

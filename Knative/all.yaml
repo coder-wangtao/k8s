@@ -1,0 +1,81 @@
+Knative 实际上是一个 Kubernetes 上的 Serverless 平台，它把传统 Deployment / Service 的操作抽象成 自动伸缩、自动路由、事件驱动。
+
+# 1. 安装 Istio（Minimal Profile）
+kubectl apply -f https://github.com/istio/istio/releases/download/1.19.0/istio-minimal.yaml
+# 2. 安装 Knative Serving CRD
+kubectl apply -f https://github.com/knative/serving/releases/download/knative-v1.13.0/serving-crds.yaml
+# 3. 安装 Knative Serving 核心组件
+kubectl apply -f https://github.com/knative/serving/releases/download/knative-v1.13.0/serving-core.yaml
+# 4. 安装网络插件（Istio Ingress）
+kubectl apply -f https://github.com/knative/net-istio/releases/download/knative-v1.13.0/release.yaml
+
+kubectl get pods -n knative-serving
+所有 Pod 都处于 Running 状态就可以使用了
+
+创建 Knative 服务（Serverless 服务）
+基本概念
+Service：Knative 的核心对象
+自动创建 Deployment + Pod
+自动路由流量
+自动生成 Revision（版本）
+
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: helloworld
+  namespace: default
+spec:
+  template:
+    spec:
+      containers:
+      - image: docker.io/kennethreitz/helloworld:latest
+        env:
+        - name: TARGET
+          value: "Knative"
+Knative 会根据流量自动创建 Pod
+Pod 数量会根据请求自动伸缩，空闲时可以缩减到 0
+
+流量管理和灰度发布
+Knative 支持 Revision（每次部署新版本都会生成一个 Revision）：
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: helloworld
+spec:
+  traffic:
+    - revisionName: helloworld-v1
+      percent: 90
+    - revisionName: helloworld-v2
+      percent: 10
+特点：
+自动生成 URL，不需要修改 Service / Ingress
+可以随时调整流量比例
+可以快速回滚到旧版本
+
+自动伸缩（Autoscaling）
+Knative 的 自动伸缩器（Autoscaler）：
+监控 Pod 的请求速率
+动态增加或减少 Pod
+支持“缩减到 0”以节省资源
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "1"   # 最少 1 个 Pod
+        autoscaling.knative.dev/maxScale: "5"   # 最多 5 个 Pod
+
+事件驱动（Eventing）
+Knative Eventing 可以把任何事件源转化成触发服务的请求，例如：
+apiVersion: sources.knative.dev/v1
+kind: PingSource
+metadata:
+  name: every-minute
+spec:
+  schedule: "*/1 * * * *"
+  sink:
+    ref:
+      apiVersion: serving.knative.dev/v1
+      kind: Service
+      name: helloworld
+每分钟触发一次 helloworld 服务
+服务可以同时响应 HTTP 请求和事件

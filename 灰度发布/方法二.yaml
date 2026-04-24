@@ -1,0 +1,8 @@
+# 使用 Canary Deployment（金丝雀发布）
+
+创建两个 Deployment：
+my-app-v1：旧版本
+my-app-v2：新版本
+使用 Service + 流量控制：
+通过 Service 或 Ingress（或者更高级的 Istio/Traefik/NGINX）控制新版本 Pod 的流量比例。
+示例：给 10% 流量到新版本，其余 90% 访问旧版本。

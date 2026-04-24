@@ -1,0 +1,24 @@
+# 方法三：使用 Service Mesh（Istio / Linkerd）
+# Service Mesh 提供更精细的灰度控制：
+# 流量按权重分配
+# 支持按 Header / Cookie / 用户 ID 分流
+# 可以快速回滚或调整比例
+# 支持监控和告警结合
+
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: my-app
+spec:
+  hosts:
+    - my-app
+  http:
+    - route:
+        - destination:
+            host: my-app
+            subset: v1
+          weight: 90
+        - destination:
+            host: my-app
+            subset: v2
+          weight: 10
